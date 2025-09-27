@@ -1,0 +1,134 @@
+<!-- LiCAS A1 MuJoCo Model, Alejandro Suarez asuarezfm@us.es -->
+<mujoco model="LiCAS_A1_Model">
+
+  <!-- Specify angles in radians. Take inertia parameters from geometry, given body mass. -->
+  <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
+  
+  <!--Compiler options: integration method and time step -->
+  <option integrator="RK4" timestep="0.001"/>
+  
+  
+  <visual>
+    <map force="0.1" zfar="30"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global offwidth="2560" offheight="1440" elevation="-20" azimuth="120"/>
+  </visual>
+  
+  
+  <asset>
+    <!-- Import the STL files with the geometry of the robotic arm.
+    	Check scale of the STL files to make sure units are correct (mm, m, inch). -->
+    <mesh name="Shoulder_Pitch_Structure_mesh" file="Assets/Shoulder_Pitch_Structure.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="Shoulder_Roll_Structure_Left_mesh" file="Assets/Shoulder_Roll_Structure_Left.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="Shoulder_Roll_Structure_Right_mesh" file="Assets/Shoulder_Roll_Structure_Right.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="Shoulder_Yaw_Structure_mesh" file="Assets/Shoulder_Yaw_Structure.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="Elbow_Pitch_Structure_Left_mesh" file="Assets/Elbow_Pitch_Structure_Left.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="Elbow_Pitch_Structure_Right_mesh" file="Assets/Elbow_Pitch_Structure_Right.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="Forearm_Link_with_Gripper_Servo_mesh" file="Assets/Forearm_Link_with_Gripper_Servo.stl" scale="0.001 0.001 0.001"/>
+    
+    <!-- IMPORTANT NOTE: when generating the 3D model of each part of the robot,
+    	 it is convenient that the origin and drawing axis are located at the 
+    	 joint axes. This will simplify the construction of the model (below). -->
+    
+    <!-- Visual appearance of floor and sky -->  
+    <texture type="skybox" builtin="gradient" rgb1=".8 .8 .8" rgb2="0.25 0.5 0.85" width="12" height="12"/>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1=".1 .2 .3" rgb2=".2 .3 .4"/>
+    <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance=".25"/>
+    
+  </asset>
+  
+  
+  <worldbody>
+    <!-- Create the floor as a 5 by 5 m plane, 1 mm thickness -->
+    <geom name="floor" size="5 5 .001" type="plane" material="grid" condim="3"/>
+    
+    <light name="spotlight" mode="targetbodycom" target="LiCAS_A1" diffuse=".8 .8 .8" specular="0.3 0.3 0.3" pos="0 -6 4" cutoff="30"/>
+    <light name="top" pos="0 0 2" mode="trackcom"/>
+    
+    <!-- Create hte robotic arm following a tree structure from the base link -->
+    <body name="LiCAS_A1" pos="0 0 1">
+      <!-- Create the geometry and set the physical properties of the manipulator base -->
+      <geom name="Shoulder_Pitch_Structure_geom" type="mesh" mesh="Shoulder_Pitch_Structure_mesh" rgba="0.6 0.8 0.8 1"/>
+      <inertial pos="0 0 0" mass="0.639"/>
+      
+      
+      <!-- Create the Left Arm Shoulder Roll Link -->
+      <body name="Shoulder_Roll_Structure_Left" pos="0 0.2 0">
+        <joint name="q11" type="hinge" axis="0 1 0" pos="0 0 0" range="-1.57 1.57" damping="0.1"/>
+        <geom name="Shoulder_Roll_Structure_Left_geom" type="mesh" mesh="Shoulder_Roll_Structure_Left_mesh" rgba="0.5 0.75 0.75 1"/>
+        <inertial pos="0 0 0" mass="0.233"/>
+        
+        <!-- Create the Left Arm Shoulder Yaw Link -->
+        <body name="Shoulder_Yaw_Structure_Left" pos="0 0 0">
+          <joint name="q12" type="hinge" axis="1 0 0" pos="0 0 0" range="-1.57 1.57" damping="0.1"/>
+          <geom name="Shoulder_Yaw_Structure_Left_geom" type="mesh" mesh="Shoulder_Yaw_Structure_mesh" rgba="0.4 0.65 0.65 1"/>
+          <inertial pos="0 0 0" mass="0.233"/>
+        
+          <!-- Create the Left Arm Elbow Pitch Link -->
+          <body name="Elbow_Pitch_Structure_Left" pos="0 0 -0.25">
+            <joint name="q13" type="hinge" axis="0 0 1" pos="0 0 0" range="-1.57 1.57" damping="0.1"/>
+            <geom name="Elbow_Pitch_Structure_Left_geom" type="mesh" mesh="Elbow_Pitch_Structure_Left_mesh" rgba="0.4 0.65 0.65 1"/>
+            <inertial pos="0 0 0" mass="0.246"/>
+        
+            <!-- Create the Left Arm Elbow Pitch Link -->
+            <body name="Forearm_Link_with_Gripper_Servo_Left" pos="0 0 0">
+              <joint name="q14" type="hinge" axis="0 1 0" pos="0 0 0" range="-2.618 2.618" damping="0.1"/>
+              <geom name="Forearm_Link_with_Gripper_Servo_Left_geom" type="mesh" mesh="Forearm_Link_with_Gripper_Servo_mesh" rgba="0.4 0.65 0.65 1"/>
+              <inertial pos="0 0 0" mass="0.106"/>
+            </body>
+          </body>    
+        </body>
+      </body>
+      
+      
+      
+      <!-- Create the Right Arm Shoulder Roll Link -->
+      <body name="Shoulder_Roll_Structure_Right" pos="0 -0.2 0">
+        <joint name="q21" type="hinge" axis="0 1 0" pos="0 0 0" range="-1.57 1.57" damping="0.1"/>
+        <geom name="Shoulder_Roll_Structure_Right_geom" type="mesh" mesh="Shoulder_Roll_Structure_Right_mesh" rgba="0.5 0.75 0.75 1"/>
+        <inertial pos="0 0 0" mass="0.233"/>
+        
+        <!-- Create the Left Arm Shoulder Yaw Link -->
+        <body name="Shoulder_Yaw_Structure_Right" pos="0 0 0">
+          <joint name="q22" type="hinge" axis="1 0 0" pos="0 0 0" range="-1.57 1.57" damping="0.1"/>
+          <geom name="Shoulder_Yaw_Structure_Right_geom" type="mesh" mesh="Shoulder_Yaw_Structure_mesh" rgba="0.4 0.65 0.65 1"/>
+          <inertial pos="0 0 0" mass="0.246"/>
+        
+          <!-- Create the Left Arm Elbow Pitch Link -->
+          <body name="Elbow_Pitch_Structure_Right" pos="0 0 -0.25">
+            <joint name="q23" type="hinge" axis="0 0 1" pos="0 0 0" range="-1.57 1.57" damping="0.1"/>
+            <geom name="Elbow_Pitch_Structure_Right_geom" type="mesh" mesh="Elbow_Pitch_Structure_Right_mesh" rgba="0.4 0.65 0.65 1"/>
+            <inertial pos="0 0 0" mass="0.214"/>
+        
+            <!-- Create the Right Arm Elbow Pitch Link -->
+            <body name="Forearm_Link_with_Gripper_Servo_Right" pos="0 0 0">
+              <joint name="q24" type="hinge" axis="0 1 0" pos="0 0 0" range="-2.618 2.618" damping="0.1"/>
+              <geom name="Forearm_Link_with_Gripper_Servo_Right_geom" type="mesh" mesh="Forearm_Link_with_Gripper_Servo_mesh" rgba="0.4 0.65 0.65 1"/>
+              <inertial pos="0 0 0" mass="0.106"/>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+    
+    <!-- Add a sphere for interacting with the robotic arm -->
+    <body name="ball" pos="0.25 0.0 100">
+      <joint name="ball_joint" type="free" damping="0.0001"/>
+      <geom type="sphere" size="0.1" friction="0.00001 0.00001 0.00001" rgba="1 0.2 0.2 1"/>
+      <inertial pos="0 0 0" mass="0.25"/>
+    </body>
+    
+  </worldbody>
+  <actuator>
+    <motor name="q11_motor" joint="q11" gear="100" ctrlrange="-2 2" ctrllimited="true"/>
+    <motor name="q12_motor" joint="q12" gear="100" ctrlrange="-1 1" ctrllimited="true"/>
+    <motor name="q13_motor" joint="q13" gear="100" ctrlrange="-1 1" ctrllimited="true"/>
+    <motor name="q14_motor" joint="q14" gear="100" ctrlrange="-1 1" ctrllimited="true"/>
+    <motor name="q21_motor" joint="q21" gear="100" ctrlrange="-2 2" ctrllimited="true"/>>
+    <motor name="q22_motor" joint="q22" gear="100" ctrlrange="-1 1" ctrllimited="true"/>>
+    <motor name="q23_motor" joint="q23" gear="100" ctrlrange="-1 1" ctrllimited="true"/>>
+    <motor name="q24_motor" joint="q24" gear="100" ctrlrange="-1 1" ctrllimited="true"/>
+  </actuator>
+</mujoco>
+
+
